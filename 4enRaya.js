@@ -24,6 +24,9 @@ var contadorMovimientos = 0;
 var rMargenY = 50;
 var rAltura = 515;
 
+//TODO: Poda alfa-beta
+//Guardamos el valor mínimo (alfa, si es MIN(juega Humano)) o máximo (beta, si es MAX(juega IA)) de cada nivel.
+//Si en al analizar una jugada de HUMANO, una opción no es inferior al mínimo...
 
 function preparar(){
 	svg = document.getElementById("svg");
@@ -225,28 +228,24 @@ function jugarIA(){
 	var mejoresJugadas = new Array();
 	
 	for (let i = 0; i < COLS; i++){
-		var valor = valorarJugada(tablero, COLOR_IA, i, 0)
-		console.log("Valor de col " + i + " = " + valor);
-		if (valor > mejorValor){
-			mejorValor = valor;
-			mejoresJugadas = [i];	//Borramos el array y metemos el nuevo valor
-		}
-		else if (valor == mejorValor){
-			mejoresJugadas.push(i);
+		if (verPrimerHueco(i, tablero) != -1){ //No comprobamos los ilegales
+			var valor = valorarJugada(tablero, COLOR_IA, i, 0)
+			console.log("Valor de col " + i + " = " + valor);
+			if (valor > mejorValor){
+				mejorValor = valor;
+				mejoresJugadas = [i];	//Borramos el array y metemos el nuevo valor
+			}
+			else if (valor == mejorValor){
+				mejoresJugadas.push(i);
+			}
 		}
 	}
 	
-	//Quitamos los movimientos ilegales
-	var jugadasPosibles = new Array();
-	for (let i = 0; i < mejoresJugadas.length; i++)
-		if (verPrimerHueco(mejoresJugadas[i], tablero) != -1)
-			jugadasPosibles.push(mejoresJugadas[i]);
-	if (jugadasPosibles.length == 0)
+	if (mejoresJugadas.length == 0)	//No hay ningún movimiento legal
 		empate();
 	else{
 		//Elegimos aleatoriamente entre las mejores mejoresJugadas
-		console.log("Mejores jugadas a (" + mejorValor + "): " + jugadasPosibles);
-		var col = jugadasPosibles[Math.floor(Math.random() * jugadasPosibles.length)];
+		var col = mejoresJugadas[Math.floor(Math.random() * mejoresJugadas.length)];
 		console.log("Juego " + col);
 		jugar(col, tablero);
 	}
@@ -257,7 +256,7 @@ function jugarIA(){
  * tablero 	- Situación del tablero antes del movimiento.
  * jugador	- Jugador que hace el movimiento (COLOR_IA | COLOR_HUMANO)
  * col		- Índice de la columna a mover.
- * profundida	- Profundidad de la jugada en el árbol.
+ * profundidad	- Profundidad de la jugada en el árbol.
  * Devuelve:
  *	 1 si gana IA.
  * 	-1 si gana HUMANO.
@@ -315,7 +314,7 @@ function valorarJugada(tablero, jugador, col, profundidad){
 function empate(){
 	console.log("Empate");
 	alert("Empate");
-	//TODO
+	pResultado.style.visibility = "visible";
 }
 
 function copiarTablero(tablero){
